@@ -4,14 +4,15 @@ import os
 
 
 status = ['AddWeight', 'Normal', 'PressureGain_constant', 'PropellerDamage_bad', 'PropellerDamage_slight']
+
+
 def intercept_datapoints(AW_Data):
     if AW_Data[:,1].shape[0] >= 181:    # Determine if the collected data points exceed 180
         data_E1 = AW_Data[1:181,1:]     # Intercept the first 180 values and discard the header
         data_E1 = normal(data_E1)   # Standardize the signal
         return data_E1
     else:
-        AW_Data = normal(AW_Data[1:, 1:])  # Standardize the signal
-        return AW_Data
+        return None
 
 
 def normal(data):
@@ -29,7 +30,6 @@ for root, dirs, files in os.walk('Dataset'):
     if any(file.lower().endswith('.csv') for file in files):
         # Process each CSV file in the current directory
         for file in files:
-            print(file)
             if file.lower().endswith('.csv'):
                 file_path = os.path.join(root, file)
                 if not os.path.exists(os.path.join('dataset_preprocessed', root)):
@@ -38,7 +38,11 @@ for root, dirs, files in os.walk('Dataset'):
                 AW_Data = pd.read_csv(str(file_path), header=None)
                 AW_Data = np.array(AW_Data)  # Convert to numpy format
                 output = intercept_datapoints(AW_Data)
-                output = normal(output)
+                if output is not None:
+                    output = normal(output)
+                    output_path = os.path.join('dataset_preprocessed', os.path.splitext(file_path)[0] + '.npy')
+                    np.save(output_path, output)
+                else:
+                    print("Dataset < 180 datapoints --> won't be included")
 
-                np.save(os.path.join('dataset_preprocessed', file_path), output)
 
