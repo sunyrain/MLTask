@@ -11,34 +11,35 @@ from collections import Counter
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+import torch.nn as nn
 
 
 class CNNClassifier(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers=1):
+    def __init__(self, input_size, hidden_size, output_size):
         super(CNNClassifier, self).__init__()
-        self.conv1d = nn.Conv1d(input_size, hidden_size, kernel_size=3, stride=1, padding=1)
-        self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool1d(kernel_size=2, stride=2)
-        self.fc = nn.Linear(hidden_size * (180 // 2),
-                            output_size)  # Adjust the input size for the fully connected layer
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(in_channels=input_size, out_channels=hidden_size, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2),
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv1d(hidden_size, output_size, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+        )
+        # Fully connected layers
+        self.fc1 = nn.Linear(output_size * (180 // 4), 128)
+        self.fc2 = nn.Linear(128, output_size)
 
     def forward(self, x):
         # Assuming x has shape (batch_size, input_size, sequence_length)
-
-        # Permute the dimensions for Conv1d layer
-        x = x.permute(0, 2, 1)
-
-        # Apply convolution, activation, and max pooling
-        x = self.conv1d(x)
-        x = self.relu(x)
-        x = self.maxpool(x)
-
-        # Flatten the output for fully connected layer
-        x = x.view(x.size(0), -1)
-
-        # Fully connected layer
-        out = self.fc(x)
-        return out
+        x = x.permute(0, 2, 1)  # Permute dimensions for Conv1d
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x.view(x.size(0), -1)  # Flatten for fully connected layers
+        x = self.fc1(x)
+        x = self.fc2(x)
+        return x
 
 
 def load_data(file_name):
@@ -66,21 +67,21 @@ test_loader = DataLoader(TensorDataset(test_data_tensor, test_labels_tensor), ba
 
 # Hyperparameters
 input_size = 16
-hidden_size = 512
+hidden_size = 64
 output_size = 5
 num_layers = 3
-learning_rate = 0.001
-num_epochs = 30
+learning_rate = 0.0007640405444859117
+num_epochs = 100
 num_models = 5
 
-model = CNNClassifier(input_size, hidden_size, output_size, num_layers).to(device)
+model = CNNClassifier(input_size, hidden_size, output_size).to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 models = []
 for i in range(num_models):
-    model = CNNClassifier(input_size, hidden_size, output_size, num_layers).to(device)
+    model = CNNClassifier(input_size, hidden_size, output_size).to(device)
     models.append(model)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
