@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from tqdm import tqdm
+
+def load_data(train_path, test_path):
+    train_df = pd.read_csv(train_path)
+    test_df = pd.read_csv(test_path)
+    Xtrain = train_df.drop('Label', axis=1).values
+    Ytrain = train_df['Label'].values
+    Xtest = test_df.drop('Label', axis=1).values
+    Ytest = test_df['Label'].values
+    return Xtrain, Ytrain, Xtest, Ytest
+
+def apply_feature_extraction(Xtrain, Xtest, Ytrain, method='pca'):
+    if method == 'pca':
+        model = PCA(n_components=2)  # 为了可视化，我们使用2个主成分
+    elif method == 'lda':
+        model = LDA(n_components=2)  # LDA的组件通常等于类别数减一
+    else:
+        raise ValueError("Unknown feature extraction method: {}".format(method))
+
+    Xtrain_transformed = model.fit_transform(Xtrain, Ytrain) if method == 'lda' else model.fit_transform(Xtrain)
+    Xtest_transformed = model.transform(Xtest)
+    print(f"Number of features after {method}:", Xtrain_transformed.shape[1])
+    return Xtrain_transformed, Xtest_transformed, model
+
+def visualize_data(X, Y, model, method):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(X[:, 0], X[:, 1], c=Y, cmap='viridis', edgecolor='k', s=20)
+    plt.title(f"{method} feature space")
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.colorbar(label='Class')
+    plt.show()
+
+def train_and_evaluate(Xtrain, Ytrain, Xtest, Ytest, feature_method):
+    print(f"Feature Extraction Method: {feature_method}")
+    Xtrain_transformed, Xtest_transformed, model = apply_feature_extraction(Xtrain, Xtest, Ytrain, method=feature_method)
+    
+    visualize_data(Xtrain_transformed, Ytrain, model, feature_method)
+
+    meta_Xtrain, meta_Xtest = train_random_forests(Xtrain_transformed, Ytrain, Xtest_transformed)
+    
+    meta_model = LogisticRegression()
+    meta_model.fit(meta_Xtrain, Ytrain)
+    predictions = meta_model.predict(meta_Xtest)
+    accuracy = accuracy_score(Ytest, predictions)
+    print("Accuracy with {}: {:.2f}%\n".format(feature_method, accuracy * 100))
+
+# 使用示例
+Xtrain, Ytrain, Xtest, Ytest = load_data('train_dataset.csv', 'test_dataset.csv')
+
+# 对比PCA和LDA特征提取方法
+for method in ['pca', 'lda']:
+    train_and_evaluate(Xtrain, Ytrain, Xtest, Ytest, feature_method=method)
