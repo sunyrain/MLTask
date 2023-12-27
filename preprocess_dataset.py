@@ -13,7 +13,7 @@ possible_status = ['AddWeight',
 
 def intercept_datapoints(input_data: np.array) -> np.array:
     if input_data[:, 1].shape[0] >= 180:    # Determine if the collected data points exceed 180
-        output_data = input_data[0:180, 1:]     # Intercept the first 180 values and discard the header
+        output_data = input_data[0:180, :]     # Intercept the first 180 values
         return output_data
     else:
         return None
@@ -30,7 +30,6 @@ def normal(input_data: np.array) -> np.array:
 def create_dataset(input_path: str):
     set_name = input_path.split('/')[-1]
     print('Loading ' + set_name + ' dataset')
-    final_dataset = np.empty((180, 17))
 
     files_counter = 0
     unused_files = 0
@@ -63,14 +62,12 @@ def create_dataset(input_path: str):
                         unused_files = unused_files + 1
 
     preprocessed_data_array = np.array(preprocessed_data_list)
-    label_array = np.array(label_list).reshape(-1, 1)
-    label_array = OneHotEncoder(sparse=False).fit_transform(label_array)
-
-
+    label_array = np.array(label_list).reshape(-1, 1).flatten()
+    #label_array = OneHotEncoder(sparse_output=False).fit_transform(label_array)
     preprocessed_data_output_path = 'X_' + set_name + '.npy'
     label_array_path = 'y_' + set_name + '.npy'
 
-    print('Found' + str(files_counter) + ' files,' + ' unused files: ' + str(unused_files))
+    print('Found ' + str(files_counter) + ' files,' + ' unused files: ' + str(unused_files))
 
     np.save(preprocessed_data_output_path, preprocessed_data_array)
     np.save(label_array_path, label_array)
