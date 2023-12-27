@@ -68,8 +68,8 @@ model = MyCNNModel(num_classes)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-train_data = CustomDataset(root_dir='dataset_preprocessed/Dataset/train')
-test_data = CustomDataset(root_dir='dataset_preprocessed/Dataset/test')
+train_data = CustomDataset(root_dir='../dataset_preprocessed/Dataset/train')
+test_data = CustomDataset(root_dir='../dataset_preprocessed/Dataset/test')
 
 
 train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
