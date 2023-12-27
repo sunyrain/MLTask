@@ -1,11 +1,6 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import sklearn
 from sklearn.ensemble import RandomForestClassifier
-from torch.utils.data import TensorDataset, DataLoader
-import torch
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 import seaborn as sns
 from sklearn.decomposition import PCA
@@ -32,7 +27,6 @@ y_test = np.load('y_test.npy')
 #possible_status = ['0: AddWeight', '1: Normal', '2: PressureGain_constant',
 # '3: PropellerDamage_bad', '4: PropellerDamage_slight']
 
-#X_train, X_test = apply_feature_extraction(X_train, X_test, y_train)
 
 rfc = RandomForestClassifier(random_state=0, n_estimators=1000)         # 3407
 rfc = rfc.fit(X_train, y_train)
