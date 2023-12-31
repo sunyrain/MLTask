@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
+from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 from sklearn.decomposition import PCA
 
@@ -15,33 +15,34 @@ def apply_feature_extraction(Xtrain, Xtest):
     return Xtrain_transformed, Xtest_transformed
 
 
-X_train = np.load('x_train.npy')
-y_train = np.load('y_train.npy')
+X_train = np.load('data/x_train.npy')
+y_train = np.load('data/y_train.npy')
 
-X_test = np.load('X_test.npy')
-y_test = np.load('y_test.npy')
+X_test = np.load('data/X_test.npy')
+y_test = np.load('data/y_test.npy')
 
+estimators = np.linspace(300, 1000, 8)
+accuracy = []
+for n in range(len(estimators)):
+    rfc = RandomForestClassifier(random_state=0, n_estimators=int(estimators[n]), criterion='gini')
+    rfc = rfc.fit(X_train, y_train)
 
-#X_train, X_test = apply_feature_extraction(X_train, X_test)
+    y_pred = rfc.predict(X_test)
 
-#possible_status = ['0: AddWeight', '1: Normal', '2: PressureGain_constant',
-# '3: PropellerDamage_bad', '4: PropellerDamage_slight']
+    score_r = rfc.score(X_test, y_test)
+    accuracy.append(score_r)
+    cm = confusion_matrix(y_test, y_pred)
+    print("Random Forest Accuracy: {}".format(score_r))
 
+plt.figure()
+plt.plot(estimators, accuracy)
+plt.grid()
+plt.xlabel('Number of estimators')
+plt.ylabel('Accuracy')
+plt.show()
 
-rfc = RandomForestClassifier(random_state=0, n_estimators=1000)         # 3407
-rfc = rfc.fit(X_train, y_train)
-
-y_pred = rfc.predict(X_test)
-
-score_r = rfc.score(X_test, y_test)
-print("Random Forest: {}" .format(score_r))
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
-print(classification_report(y_test, y_pred))
-
-
-cm = confusion_matrix(y_test, y_pred)
-print(cm)
+#print(classification_report(y_test, y_pred))
+#print(cm)
 
 plt.figure()
 sns.heatmap(cm, annot=True)
