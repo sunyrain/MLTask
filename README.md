@@ -1,6 +1,6 @@
 # MLTask
 - In this project, several classification algorithms were implemented and evaluated. The best accuracy has been achieved using a Random Forest Classifier. The main scripts supporting this statement are 'randomforestclassifier.py' and 'randomforestclassifier.ipynb'. The datasets used in those files were processed using 'preprocess_data.py' and saved under '/data'
-- Other classification algorithms were saved in 'RNN', 'CNN', and 'other_models'
+- Other classification algorithms were saved in 'RNN', 'CNN', and 'basic learnings.py'
 - The implementation of several additional data-preprocessing techniques are saved under:
   - The "some_processed_data" folder contains the data prepared using some
   - The file 'preprocess_data_fft_maf.py' contains a FFT and moving average filter implementation on the input data
