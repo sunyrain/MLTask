@@ -6,5 +6,5 @@
   - The file 'preprocess_data_fft_maf.py' contains a FFT and moving average filter implementation on the input data
   - The "data_process.ipynb" file contains the code for preparing the dataset for the Machine Learning model.
   - The "visualization"folder contains the code and data for visualizations.
-  - The "visualization.ipynb" file contains the code for visualizations.
-  - The four .npy files are the data currently using, prepared for visualizations.
+    - The "visualization.ipynb" file contains the code for visualizations.
+    - The four .npy files are the data currently using, prepared for visualizations.
