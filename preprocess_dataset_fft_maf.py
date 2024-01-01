@@ -27,42 +27,35 @@ def normal(input_data: np.array) -> np.array:
     return input_data
 
 
-def FFTvibData(vib_value):  # 定义一个名为 FFTvibData 的函数
+def FFTvibData(vib_value):
     fft_freq = np.fft.fftfreq(len(vib_value))
     fft_result = np.fft.fft(vib_value)
     fft_result_shifted = np.fft.fftshift(fft_result)
     fft_freq_shifted = np.fft.fftshift(fft_freq)
 
-    #vib_fft = [np.fft.fft(vib_value[i, :]) for i in range(vib_value.shape[0])]  # 对振动数据进行FFT变换。
-    vib_fft_abs = np.abs(fft_result_shifted)  # 计算FFT结果的幅度。
-    vib_fft_ang = np.angle(fft_result_shifted)  # 计算FFT结果的相位。
+    #vib_fft = [np.fft.fft(vib_value[i, :]) for i in range(vib_value.shape[0])]
+    vib_fft_abs = np.abs(fft_result_shifted)
+    vib_fft_ang = np.angle(fft_result_shifted)
 
     return vib_fft_abs, vib_fft_ang, fft_freq_shifted
 
 
-def timeWindows(vib_fft, length=10):  # 定义一个名为timeWindows的函数
-    '''
-    对转换后的频域信号进行滑动时间窗平均，窗口的长度为length
-    返回值类型为np.array，是经过移动平均之后的频域信号
-    '''
-    vib_fft_TW = []  # 创建一个空列表vib_fft_TW，用于存储滑动时间窗平均后的频域信号。
+def timeWindows(vib_fft, length=10):
+
+    vib_fft_TW = []
     for i in range(vib_fft.shape[1]):
         temp = vib_fft[:length, i].tolist()
-        for j in range(vib_fft.shape[0] - length):  # 遍历从0到频域信号的行数减去窗口长度的范围，表示滑动窗口的起始位置。
-            a = np.mean(vib_fft[j:(j + length), i])  # 计算当前窗口内频域信号的均值，并将其存储在变量a中。
+        for j in range(vib_fft.shape[0] - length):
+            a = np.mean(vib_fft[j:(j + length), i])
             temp.append(a)
-        vib_fft_TW.append(temp)  # 将经过滑动时间窗平均的一列频域信号添加到结果列表中
+        vib_fft_TW.append(temp)
 
-    vib_fft_TW = np.array(vib_fft_TW).T  # 将结果列表转换为NumPy数组，并进行转置（.T）以得到与原始频域信号相同的形状
+    vib_fft_TW = np.array(vib_fft_TW).T
 
-    return (vib_fft_TW)
+    return vib_fft_TW
 
 
 def ifftPredict(vib_fft_pre, select_fre, NUM=500):
-    '''
-    根据预测得到的频域信号进行快速傅里叶逆变换得到原始的时域信号
-    返回值类型为np.array
-    '''
     vib_fft_pre = abs(vib_fft_pre) * np.exp(1j * np.random.uniform(0, 2 * np.pi, (vib_fft_pre.shape)))
     vib_fft = np.zeros([vib_fft_pre.shape[0], NUM], dtype=complex)
     vib_fft[:, select_fre] = vib_fft_pre
@@ -72,14 +65,10 @@ def ifftPredict(vib_fft_pre, select_fre, NUM=500):
     vib_fft[:, select_fre] = vib_fft_pre[:, 1:]
     vib_pre = np.array([np.fft.ifft(vib_fft[i, :]).real for i in range(vib_fft_pre.shape[0])]).reshape(-1)
 
-    return (vib_pre)
+    return vib_pre
 
 
 def ifftOrigin(vib_fft_abs, vib_fft_ang):
-    '''
-    根据经过滑动时间窗平均得到的频域信号进行快速傅里叶逆变换得到原始的时域信号
-    返回值类型为np.array
-    '''
     vib_fft = abs(vib_fft_abs) * np.exp(1j * vib_fft_ang)
     vib_origin = np.array([np.fft.ifft(vib_fft[i, :]).real for i in range(vib_fft.shape[0])]).reshape(-1)
 
@@ -129,8 +118,8 @@ def create_dataset(input_path: str):
     preprocessed_data_array = np.array(preprocessed_data_list)
     label_array = np.array(label_list).reshape(-1, 1).flatten()
     #label_array = OneHotEncoder(sparse_output=False).fit_transform(label_array)
-    preprocessed_data_output_path = 'data/X_' + set_name + '.npy'
-    label_array_path = 'data/y_' + set_name + '.npy'
+    preprocessed_data_output_path = 'data/X_' + set_name + '_fft.npy'
+    label_array_path = 'data/y_' + set_name + '_fft.npy'
 
     print('Found ' + str(files_counter) + ' files,' + ' unused files: ' + str(unused_files))
 

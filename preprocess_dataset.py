@@ -64,8 +64,8 @@ def create_dataset(input_path: str):
     preprocessed_data_array = np.array(preprocessed_data_list)
     label_array = np.array(label_list).reshape(-1, 1).flatten()
     #label_array = OneHotEncoder(sparse_output=False).fit_transform(label_array)
-    preprocessed_data_output_path = 'X_' + set_name + '.npy'
-    label_array_path = 'y_' + set_name + '.npy'
+    preprocessed_data_output_path = 'data/X_' + set_name + '.npy'
+    label_array_path = 'data/y_' + set_name + '.npy'
 
     print('Found ' + str(files_counter) + ' files,' + ' unused files: ' + str(unused_files))
 

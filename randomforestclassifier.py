@@ -21,8 +21,11 @@ y_train = np.load('data/y_train.npy')
 X_test = np.load('data/X_test.npy')
 y_test = np.load('data/y_test.npy')
 
-estimators = np.linspace(300, 1000, 8)
+estimators = np.linspace(1000, 1000, 1)
 accuracy = []
+accuracy_best = 0
+n_estimators_best = 0
+best_cm = 0
 for n in range(len(estimators)):
     rfc = RandomForestClassifier(random_state=0, n_estimators=int(estimators[n]), criterion='gini')
     rfc = rfc.fit(X_train, y_train)
@@ -32,22 +35,26 @@ for n in range(len(estimators)):
     score_r = rfc.score(X_test, y_test)
     accuracy.append(score_r)
     cm = confusion_matrix(y_test, y_pred)
+    print("Number of estimators: \n", int(estimators[n]))
     print("Random Forest Accuracy: {}".format(score_r))
+    print(classification_report(y_test, y_pred))
+    print(cm)
+    if score_r > accuracy_best:
+        n_estimators_best = int(estimators[n])
+        accuracy_best = score_r
+        best_cm = cm
 
 plt.figure()
-plt.plot(estimators, accuracy)
+plt.plot(estimators, accuracy, linestyle='--', marker='o')
 plt.grid()
 plt.xlabel('Number of estimators')
 plt.ylabel('Accuracy')
 plt.show()
 
-#print(classification_report(y_test, y_pred))
-#print(cm)
-
 plt.figure()
-sns.heatmap(cm, annot=True)
+sns.heatmap(best_cm, annot=True)
 plt.xlabel('Predicted')
 plt.ylabel('Truth')
-plt.title('Confusion Matrix')
-#plt.legend(possible_status)
-#plt.show()
+plt.title('Confusion Matrix with number of estimators:' + str(n_estimators_best))
+# plt.legend(possible_status)
+plt.show()
